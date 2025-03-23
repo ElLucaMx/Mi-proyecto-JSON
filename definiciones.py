@@ -62,7 +62,7 @@ def menu():
             print("Esa acción no esta definida en el programa\n")
             
             
-def empresa_juegos_info2(datos):  # Listar empresa principal con total de juegos y plataformas disponibles
+def empresa_juegos_info2(datos):  # Listar empresa con total de juegos y plataformas disponibles
     info = []
     
     for empresa in datos:
@@ -70,13 +70,13 @@ def empresa_juegos_info2(datos):  # Listar empresa principal con total de juegos
         cont_juegos = 0
         plataformas_disponibles = set()  # Conjunto para evitar duplicados
         
-        # Procesar juegos de la empresa principal
+        # Datos de la empresa principal
         for juego in empresa.get("exclusivos", []):
             cont_juegos += 1
             plataformas = juego.get("jugabilidad", {}).get("plataformas", [])
             plataformas_disponibles.update(plataformas)
         
-        # Procesar juegos de la subempresa (si existe)
+        # Datos de la subempresa
         subempresa = empresa.get("subempresa")
         if subempresa:
             for juego in subempresa.get("exclusivos", []):
