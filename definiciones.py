@@ -1,5 +1,4 @@
-# 2º Para cada empresa, mostrar el total de juegos y el número de plataformas disponibles.
-# 3º Dado un intervlao de años, mostrar los juegos, junto con su género y la desarrolladora.
+# 
 # 4º Dada la Desarrolladora, muestrar los títulos de los juegos desarrollados y los principales responsables implicados.
 # 5º Ingresar un valor mínimo de ventas y mostrar los juegos por encima de ese mínimo, mostrar título, empresa y ventas.
 # 
@@ -10,6 +9,7 @@ main="""___________ Menú ___________
 
 1º Lista de empresas con sus juegos y puntuación.
 2º Para cada empresa mostrar el total de juegos y plataformas disponibles.
+3º Dado un intervlao de años, mostrar los juegos, junto con su género y la desarrolladora.
 6º Salir
 
 """
@@ -29,18 +29,17 @@ def menu():
             
         except ValueError:
             print("Debe introducir un número.")
-            continue
         
         if decision == 1:
-            print("\n{:^25} | {:^45} | {:^12}".format("Empresa", "Juego", "Puntuación"))
-            print("-" * 85)
+            print("\n{:^28} | {:^45} | {:^12}".format("Empresa", "Juego", "Puntuación"))
+            print("-" * 93)
             lista_juegos = empresas_juegos_info1(datos)
             for empresa, juego, puntuacion in lista_juegos:
-                print("{:<25} | {:<45} | {:<12}".format(empresa, juego, puntuacion))
+                print("{:<28} | {:<45} | {:<12}".format(empresa, juego, puntuacion))
             print("")
 
         elif decision == 2:
-            lista_info = empresa_juegos_info2(datos)
+            lista_info = empresa_juegos_plataformas(datos)
             print("\n{:^25} | {:^12} | {:^30}".format("Empresa", "Nº de juegos", "Plataformas"))
             print("-" * 75)
             for empresa, num_juegos, plataformas in lista_info:
@@ -50,7 +49,8 @@ def menu():
             print("")
             
         elif decision == 3:
-            print("De momento nada")
+            empresa_juegos_anio(datos)
+            
         elif decision == 4:
             print("De momento nada")
         elif decision == 5:
@@ -61,8 +61,40 @@ def menu():
         else:
             print("Esa acción no esta definida en el programa\n")
             
+def empresa_juegos_anio(datos):  # Dado un intervalo de años, mostrar los juegos, junto con su género y la desarrolladora.
+    try:
+        inicio = int(input("Año de inicio: "))
+        fin = int(input("Año de fin: "))
+    except ValueError:
+        print("Debe introducir un año válido.")
+        return  # Sale de la función si hay error en la conversión a entero
+
+    print("\n{:^45} | {:^30} | {:^25}".format("Juego", "Género", "Desarrolladora"))
+    print("-" * 106)
+    
+    # Recorrer empresas y sus juegos
+    for empresa in datos:
+        # Juegos de la empresa principal
+        for juego in empresa.get("exclusivos", []):
+            anio = juego.get("anioLanzamiento", 0)
+            if inicio <= anio <= fin:
+                titulo = juego.get("titulo")
+                genero = juego.get("genero")
+                desarrolladora = juego.get("desarrollo", {}).get("desarrolladora")
+                print("{:<45} | {:<30} | {:<25}".format(titulo, genero, desarrolladora))
+                
+        # Juegos de la subempresa (si existe)
+        subempresa = empresa.get("subempresa")
+        if subempresa:
+            for juego in subempresa.get("exclusivos", []):
+                anio = juego.get("anioLanzamiento", 0)
+                if inicio <= anio <= fin:
+                    titulo = juego.get("titulo")
+                    genero = juego.get("genero")
+                    desarrolladora = juego.get("desarrollo", {}).get("desarrolladora")
+                    print("{:<45} | {:<30} | {:<25}".format(titulo, genero, desarrolladora))
             
-def empresa_juegos_info2(datos):  # Listar empresa con total de juegos y plataformas disponibles
+def empresa_juegos_plataformas(datos):  # Listar empresa con total de juegos y plataformas disponibles
     info = []
     
     for empresa in datos:
@@ -110,5 +142,3 @@ def empresas_juegos_info1(datos):		# Lista de empresas con sus juegos y puntuaci
                 lista_completa.append((nombre_subempresa, titulo, puntuacion))
                 
     return lista_completa
-    
-    
