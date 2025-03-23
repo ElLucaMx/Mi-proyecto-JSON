@@ -9,7 +9,7 @@ import json
 main="""___________ Menú ___________
 
 1º Lista de empresas con sus juegos y puntuación.
-
+2º Para cada empresa mostrar el total de juegos y plataformas disponibles.
 6º Salir
 
 """
@@ -34,13 +34,21 @@ def menu():
         if decision == 1:
             print("\n{:^25} | {:^45} | {:^12}".format("Empresa", "Juego", "Puntuación"))
             print("-" * 85)
-            lista_juegos = empresas_juegos(datos)
+            lista_juegos = empresas_juegos_info1(datos)
             for empresa, juego, puntuacion in lista_juegos:
                 print("{:<25} | {:<45} | {:<12}".format(empresa, juego, puntuacion))
             print("")
 
         elif decision == 2:
-            print("De momento nada")
+            lista_info = empresa_juegos_info2(datos)
+            print("\n{:^25} | {:^12} | {:^30}".format("Empresa", "Nº de juegos", "Plataformas"))
+            print("-" * 75)
+            for empresa, num_juegos, plataformas in lista_info:
+                # Convertir la lista de plataformas en una cadena separada por comas
+                plataformas_str = ", ".join(plataformas)
+                print("{:<25} | {:<12} | {:<30}".format(empresa, num_juegos, plataformas_str))
+            print("")
+            
         elif decision == 3:
             print("De momento nada")
         elif decision == 4:
@@ -53,7 +61,34 @@ def menu():
         else:
             print("Esa acción no esta definida en el programa\n")
             
-def empresas_juegos(datos):		# Lista de empresas con sus juegos y puntuación
+            
+def empresa_juegos_info2(datos):  # Listar empresa principal con total de juegos y plataformas disponibles
+    info = []
+    
+    for empresa in datos:
+        nombre = empresa["nombre"]
+        cont_juegos = 0
+        plataformas_disponibles = set()  # Conjunto para evitar duplicados
+        
+        # Procesar juegos de la empresa principal
+        for juego in empresa.get("exclusivos", []):
+            cont_juegos += 1
+            plataformas = juego.get("jugabilidad", {}).get("plataformas", [])
+            plataformas_disponibles.update(plataformas)
+        
+        # Procesar juegos de la subempresa (si existe)
+        subempresa = empresa.get("subempresa")
+        if subempresa:
+            for juego in subempresa.get("exclusivos", []):
+                cont_juegos += 1
+                plataformas = juego.get("jugabilidad", {}).get("plataformas", [])
+                plataformas_disponibles.update(plataformas)
+                
+        info.append((nombre, cont_juegos, list(plataformas_disponibles)))
+    
+    return info
+        
+def empresas_juegos_info1(datos):		# Lista de empresas con sus juegos y puntuación
     lista_completa = []
     
     # Entrar en la lista principal
