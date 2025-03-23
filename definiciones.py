@@ -1,13 +1,11 @@
-# 4º Dada la Desarrolladora, muestrar los títulos de los juegos desarrollados y los principales responsables implicados.
-# 5º Ingresar un valor mínimo de ventas y mostrar los juegos por encima de ese mínimo, mostrar título, empresa y ventas.
-
 import json
 
 main="""___________ Menú ___________
 
 1º Lista de empresas con sus juegos y puntuación.
 2º Para cada empresa mostrar el total de juegos y plataformas disponibles.
-3º Dado un intervlao de años, mostrar los juegos, junto con su género y la desarrolladora.
+3º Dado un intervalo de años, mostrar los juegos, junto con su género y la desarrolladora.
+4º Dada la Desarrolladora y mostrar los títulos de los juegos desarrollados y los principales responsables implicados.
 5º Ingresar un valor mínimo de ventas y mostrar los juegos por encima de ese mínimo, mostrar título, empresa y ventas.
 6º Salir
 
@@ -36,7 +34,6 @@ def menu():
             for empresa, juego, puntuacion in lista_juegos:
                 print("{:<28} | {:<45} | {:<12}".format(empresa, juego, puntuacion))
             print("")
-
         elif decision == 2:
             lista_info = empresa_juegos_plataformas(datos)
             print("\n{:^25} | {:^12} | {:^30}".format("Empresa", "Nº de juegos", "Plataformas"))
@@ -46,12 +43,12 @@ def menu():
                 plataformas_str = ", ".join(plataformas)
                 print("{:<25} | {:<12} | {:<30}".format(empresa, num_juegos, plataformas_str))
             print("")
-            
         elif decision == 3:
             empresa_juegos_anio(datos)
-            
+            print("")
         elif decision == 4:
-            print("De momento nada")
+            juegos_por_desarrolladora(datos)
+            print("")
         elif decision == 5:
             juegos_ventas_minimas(datos)
             print("")
@@ -61,11 +58,60 @@ def menu():
         else:
             print("Esa acción no esta definida en el programa\n")
 
+def juegos_por_desarrolladora(datos):
+    # Obtener todas las desarrolladoras únicas
+    desarrolladoras = set()
+
+    for empresa in datos:
+        for juego in empresa.get("exclusivos"):
+            desarrolladora = juego.get("desarrollo").get("desarrolladora")
+            desarrolladoras.add(desarrolladora)
+
+        subempresa = empresa.get("subempresa")
+        for juego in subempresa.get("exclusivos"):
+            desarrolladora = juego.get("desarrollo").get("desarrolladora")
+            desarrolladoras.add(desarrolladora)
+
+    # Mostrar las desarrolladoras
+    print("\nDesarrolladoras:")
+    for i, dev in enumerate(sorted(desarrolladoras), 1):
+        print(f"{i}. {dev}")
+
+    # Pedir al usuario que seleccione una desarrolladora
+    desarrolladora_input = input("\nIngrese el nombre de la desarrolladora: ").strip()
+
+    print("\n{:^45} | {:^45}".format("Juego", "Principales Responsables"))
+    print("-" * 94)
+    encontrado = False
+
+    # Buscar juegos por la desarrolladora seleccionada
+    for empresa in datos:
+        for juego in empresa.get("exclusivos"):
+            desarrolladora = juego.get("desarrollo").get("desarrolladora")
+            if desarrolladora.lower() == desarrolladora_input.lower():
+                titulo = juego.get("titulo")
+                responsables = ", ".join(juego.get("desarrollo").get("personas"))
+                print("{:<45} | {:<45}".format(titulo, responsables))
+                encontrado = True
+
+        subempresa = empresa.get("subempresa")
+        for juego in subempresa.get("exclusivos"):
+            desarrolladora = juego.get("desarrollo").get("desarrolladora", "")
+            if desarrolladora.lower() == desarrolladora_input.lower():
+                titulo = juego.get("titulo")
+                responsables = ", ".join(juego.get("desarrollo").get("personas"))
+                print("{:<45} | {:<45}".format(titulo, responsables))
+                encontrado = True
+
+    if not encontrado:
+        print("No se ha encontrado esa desarolladora.")
+
+
 def juegos_ventas_minimas(datos):
     try:
         minimo = float(input("Ingrese el valor mínimo de ventas (en millones): "))
     except ValueError:
-        print("Debe introducir un número válido.")
+        print("Debe introducir un carácter válido(numeros).")
         return  # Salir en caso de error en la conversión
 
     print("\n{:^45} | {:^28} | {:^15}".format("Juego", "Empresa", "Ventas"))
@@ -98,7 +144,7 @@ def empresa_juegos_anio(datos):  # Dado un intervalo de años, mostrar los juego
         inicio = int(input("Año de inicio: "))
         fin = int(input("Año de fin: "))
     except ValueError:
-        print("Debe introducir un año válido.")
+        print("Debe introducir un carácter válido(año).")
         return  # Sale de la función si hay error en la conversión a entero
 
     print("\n{:^45} | {:^30} | {:^25}".format("Juego", "Género", "Desarrolladora"))
@@ -165,7 +211,7 @@ def empresas_juegos_info1(datos):		# Lista de empresas con sus juegos y puntuaci
         subempresa = empresa.get("subempresa")
         nombre_subempresa = subempresa.get("nombre")	#Me quedo con la empresa
 
-        for juego in subempresa.get("exclusivos"):
+        for juego in subempresa.get("exclusivos", []):
             titulo = juego.get("titulo")
             puntuacion = juego.get("puntuacionCritica")
             lista_completa.append((nombre_subempresa, titulo, puntuacion))
